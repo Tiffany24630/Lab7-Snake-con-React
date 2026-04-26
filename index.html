@@ -117,6 +117,9 @@
                 ]);
 
                 const[direction, setDirection] = React.useState("RIGHT");
+                const [food, setFood] = React.useState(getRandomCell()); 
+                const [score, setScore] = React.useState(0); 
+                const [gameOver, setGameOver] = React.useState(false); 
 
                 React.useEffect(() => {
                     const handleKey = (e) => {
@@ -142,11 +145,22 @@
                 const restart = () => {
                     setSnake([{ x: 10, y: 10 }]);
                     setDirection("RIGHT");
+                    setFood(getRandomCell()); 
+                    setScore(0); 
+                    setGameOver(false); 
                 };
 
                 return (
                     <div>
                         <Board snake = {snake} />
+                        <Board snake={snake} food={food} />
+                        {gameOver && ( 
+                            <div className="game-over">
+                                Game Over
+                                <br />
+                                <button onClick={restart}>Reiniciar</button>
+                            </div>
+                        )}
                     </div>
                 );
             }
