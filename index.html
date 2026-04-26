@@ -59,6 +59,12 @@
                 padding: 8px;
                 cursor: pointer;
             }
+
+            .title {
+                font-size: 24px;
+                margin-bottom: 20px;
+                color: limegreen;
+            }
         </style>
     </head>
 
@@ -150,7 +156,6 @@
                         case "RIGHT": head.x += 1; break;
                     }
 
-                    // colisiones
                     if (
                         head.x < 0 || head.x >= SIZE ||
                         head.y < 0 || head.y >= SIZE ||
@@ -186,6 +191,7 @@
 
         return (
             <div>
+                <div className="title">SnakeGame</div>
                 <Score score={score} />
                 <Board snake={snake} food={food} />
 
@@ -199,7 +205,6 @@
             </div>
         );
     }
-
         ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
 
