@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
     <head>
-        <meta charset=""UTF-8 />
+        <meta charset="UTF-8" />
         <title>Snake React</title>
 
         <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -41,6 +41,7 @@
 
             .food { 
                 background: red;
+                border-radius: 50%;
             }
 
             .score { 
@@ -62,108 +63,145 @@
     </head>
 
     <body>
-        <div id="root"></div>
-        <script type="text/babel">
-            const SIZE = 20;
+    <div id="root"></div>
 
-            function getRandomCell() {
-                return {
-                    x: Math.floor(Math.random() * SIZE),
-                    y: Math.floor(Math.random() * SIZE)
-                };
-            }
+    <script type="text/babel">
+    const SIZE = 20;
 
-            function Score({ score }) {
-                return <div className="score">Score: {score}</div>;
-            }
+    function getRandomCell() {
+        return {
+            x: Math.floor(Math.random() * SIZE),
+            y: Math.floor(Math.random() * SIZE)
+        };
+    }
 
-            function Food({ food }) {
-                return (
-                    <div 
-                        className="cell food"
-                        style={{
-                            gridColumn: food.x + 1,
-                            gridRow: food.y + 1
-                        }}
-                    />
-                );
-            }
+    function Score({ score }) {
+        return <div className="score">Score: {score}</div>;
+    }
 
-            function Snake({ snake }){
-                return snake.map((segment, i) => (
-                    <div 
-                        key = {1}
-                        className = "cell snake"
-                        style = {{
-                            gridColumn: segment.x + 1,
-                            gridRow: segment.y + 1
-                        }}
-                    />
-                ));
-            }
+    function Food({ food }) {
+        return (
+            <div 
+                className="cell food"
+                style={{
+                    gridColumn: food.x + 1,
+                    gridRow: food.y + 1
+                }}
+            />
+        );
+    }
 
-            function Board({ snake, food }) {
-                return (
-                    <div className="board">
-                        <Snake snake={snake} />
-                        <Food food={food} />
+    function Snake({ snake }){
+        return snake.map((segment, i) => (
+            <div 
+                key={i}
+                className="cell snake"
+                style={{
+                    gridColumn: segment.x + 1,
+                    gridRow: segment.y + 1
+                }}
+            />
+        ));
+    }
+
+    function Board({ snake, food }) {
+        return (
+            <div className="board">
+                <Snake snake={snake} />
+                <Food food={food} />
+            </div>
+        );
+    }
+
+    function App(){
+        const [snake, setSnake] = React.useState([{ x: 10, y: 10 }]);
+        const [direction, setDirection] = React.useState("RIGHT");
+        const [food, setFood] = React.useState(getRandomCell()); 
+        const [score, setScore] = React.useState(0); 
+        const [gameOver, setGameOver] = React.useState(false); 
+
+        React.useEffect(() => {
+            const handleKey = (e) => {
+                setDirection(prev => {
+                    switch (e.key){
+                        case "ArrowUp": return prev !== "DOWN" ? "UP" : prev;
+                        case "ArrowDown": return prev !== "UP" ? "DOWN" : prev;
+                        case "ArrowLeft": return prev !== "RIGHT" ? "LEFT" : prev;
+                        case "ArrowRight": return prev !== "LEFT" ? "RIGHT" : prev;
+                        default: return prev;
+                    }
+                });
+            };
+            window.addEventListener("keydown", handleKey);
+            return () => window.removeEventListener("keydown", handleKey);
+        }, []);
+
+        React.useEffect(() => {
+            if(gameOver) return;
+
+            const interval = setInterval(() => {
+                setSnake(prev => {
+                    const head = { ...prev[0] };
+
+                    switch (direction) {
+                        case "UP": head.y -= 1; break;
+                        case "DOWN": head.y += 1; break;
+                        case "LEFT": head.x -= 1; break;
+                        case "RIGHT": head.x += 1; break;
+                    }
+
+                    // colisiones
+                    if (
+                        head.x < 0 || head.x >= SIZE ||
+                        head.y < 0 || head.y >= SIZE ||
+                        prev.some(seg => seg.x === head.x && seg.y === head.y)
+                    ) {
+                        setGameOver(true);
+                        return prev;
+                    }
+
+                    let newSnake = [head, ...prev];
+
+                    if (head.x === food.x && head.y === food.y) {
+                        setFood(getRandomCell());
+                        setScore(s => s + 1);
+                    } else {
+                        newSnake.pop();
+                    }
+
+                    return newSnake;
+                });
+            }, 150);
+
+            return () => clearInterval(interval);
+        }, [direction, food, gameOver]);
+
+        const restart = () => {
+            setSnake([{ x: 10, y: 10 }]);
+            setDirection("RIGHT");
+            setFood(getRandomCell()); 
+            setScore(0); 
+            setGameOver(false); 
+        };
+
+        return (
+            <div>
+                <Score score={score} />
+                <Board snake={snake} food={food} />
+
+                {gameOver && ( 
+                    <div className="game-over">
+                        Game Over
+                        <br />
+                        <button onClick={restart}>Reiniciar</button>
                     </div>
-                );
-            }
+                )}
+            </div>
+        );
+    }
 
-            function App(){
-                const [snake, setSnake] = React.useState([
-                    { x: 10, y: 10 }
-                ]);
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
 
-                const[direction, setDirection] = React.useState("RIGHT");
-                const [food, setFood] = React.useState(getRandomCell()); 
-                const [score, setScore] = React.useState(0); 
-                const [gameOver, setGameOver] = React.useState(false); 
-
-                React.useEffect(() => {
-                    const handleKey = (e) => {
-                        switch (e.key){
-                            case "ArrowUp":
-                                setDirection("UP");
-                                break;
-                            case "ArrowDown":
-                                setDirection("DOWN");
-                                break;
-                            case "ArrowLeft":
-                                setDirection("LEFT");
-                                break;
-                            case "ArrowRight":
-                                setDirection("RIGHT");
-                                break;
-                        }
-                    };
-                    window.addEventListener("keydown", handleKey);
-                    return () => window.removeEventListener("keydown", handleKey);
-                }, []);
-
-                const restart = () => {
-                    setSnake([{ x: 10, y: 10 }]);
-                    setDirection("RIGHT");
-                    setFood(getRandomCell()); 
-                    setScore(0); 
-                    setGameOver(false); 
-                };
-
-                return (
-                    <div>
-                        <Board snake = {snake} />
-                        <Board snake={snake} food={food} />
-                        {gameOver && ( 
-                            <div className="game-over">
-                                Game Over
-                                <br />
-                                <button onClick={restart}>Reiniciar</button>
-                            </div>
-                        )}
-                    </div>
-                );
-            }
-        </script>
     </body>
 </html>
