@@ -39,6 +39,20 @@
                 background: lime;
             }
 
+            .food { 
+                background: red;
+            }
+
+            .score { 
+                margin-bottom: 10px;
+            }
+
+            .game-over { 
+                margin-top: 10px;
+                color: red;
+                font-weight: bold;
+            }
+
             button {
                 margin-top: 10px;
                 padding: 8px;
@@ -59,6 +73,22 @@
                 };
             }
 
+            function Score({ score }) {
+                return <div className="score">Score: {score}</div>;
+            }
+
+            function Food({ food }) {
+                return (
+                    <div 
+                        className="cell food"
+                        style={{
+                            gridColumn: food.x + 1,
+                            gridRow: food.y + 1
+                        }}
+                    />
+                );
+            }
+
             function Snake({ snake }){
                 return snake.map((segment, i) => (
                     <div 
@@ -70,6 +100,15 @@
                         }}
                     />
                 ));
+            }
+
+            function Board({ snake, food }) {
+                return (
+                    <div className="board">
+                        <Snake snake={snake} />
+                        <Food food={food} />
+                    </div>
+                );
             }
 
             function App(){
